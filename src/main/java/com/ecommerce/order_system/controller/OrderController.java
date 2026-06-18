@@ -12,9 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class OrderController {
     @PostMapping
     @Operation(summary = "Create a new order")
     public ResponseEntity<Order> createOrder(@Valid @RequestBody CreateOrderRequest request) {
+        log.info("REST request to create an order received");
         Order createdOrder = orderService.createOrder(request);
         return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
     }
@@ -33,6 +36,7 @@ public class OrderController {
     @GetMapping("/{id}")
     @Operation(summary = "Get an order by its ID")
     public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+        log.info("REST request to get order with id: {}", id);
         Order order = orderService.getOrderById(id);
         return ResponseEntity.ok(order);
     }
@@ -42,6 +46,7 @@ public class OrderController {
     public ResponseEntity<Page<Order>> getAllOrders(
             @RequestParam(required = false) OrderStatus status,
             Pageable pageable) {
+        log.info("REST request to get all orders with status: {} and pageable: {}", status, pageable);
         Page<Order> orders = orderService.getAllOrders(status, pageable);
         return ResponseEntity.ok(orders);
     }
@@ -51,6 +56,7 @@ public class OrderController {
     public ResponseEntity<Order> updateOrderStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdateOrderStatusRequest request) {
+        log.info("REST request to update order status for id: {} to {}", id, request.getStatus());
         Order updatedOrder = orderService.updateOrderStatus(id, request.getStatus());
         return ResponseEntity.ok(updatedOrder);
     }
@@ -58,6 +64,7 @@ public class OrderController {
     @PostMapping("/{id}/cancel")
     @Operation(summary = "Cancel an order (only if PENDING)")
     public ResponseEntity<Void> cancelOrder(@PathVariable Long id) {
+        log.info("REST request to cancel order with id: {}", id);
         orderService.cancelOrder(id);
         return ResponseEntity.noContent().build();
     }

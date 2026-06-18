@@ -2,7 +2,7 @@ package com.ecommerce.order_system.job;
 
 import com.ecommerce.order_system.model.Order;
 import com.ecommerce.order_system.model.OrderStatus;
-import com.ecommerce.order_system.repository.OrderRepository;
+import com.ecommerce.order_system.dao.OrderDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 public class OrderStatusJob {
 
-    private final OrderRepository orderRepository;
+    private final OrderDao orderDao;
 
     /**
      * This job runs every 5 minutes and updates all PENDING orders to PROCESSING.
@@ -26,7 +26,7 @@ public class OrderStatusJob {
     public void processPendingOrders() {
         log.info("Running background job to update PENDING orders to PROCESSING...");
 
-        List<Order> pendingOrders = orderRepository.findByStatus(OrderStatus.PENDING);
+        List<Order> pendingOrders = orderDao.findByStatus(OrderStatus.PENDING);
 
         if (pendingOrders.isEmpty()) {
             log.info("No PENDING orders found.");
@@ -39,7 +39,7 @@ public class OrderStatusJob {
             order.setStatus(OrderStatus.PROCESSING);
         }
 
-        orderRepository.saveAll(pendingOrders);
+        orderDao.saveAll(pendingOrders);
         log.info("Successfully updated {} orders to PROCESSING.", pendingOrders.size());
     }
 }

@@ -23,7 +23,11 @@ The system is built as a **Monolithic RESTful Web Service** representing a core 
 |  |      Service Layer      |  |  <-- Core Business Logic & Transactions
 |  +-------------------------+  |
 |             |                 |
-|  +-------------------------+  |  <-- Data Access via Spring Data JPA
+|  +-------------------------+  |
+|  |        DAO Layer        |  |  <-- Data Access Abstraction
+|  +-------------------------+  |
+|             |                 |
+|  +-------------------------+  |  <-- Spring Data JPA Interfaces
 |  |       Repository        |  |
 |  +-------------------------+  |
 +-------------------------------+
@@ -38,11 +42,13 @@ The system strictly adheres to enterprise **SOLID** principles and the layered a
 1. **Controllers (`OrderController`)**: Handles HTTP requests, enforces API contracts (DTOs via `@Valid`), and outputs HTTP Responses. Includes Pagination via Spring Data `Pageable`.
 2. **DTOs (Data Transfer Objects)**: Encapsulate input parameters (e.g., `CreateOrderRequest`). This decouples the API contract from internal database entities.
 3. **Services (`OrderService` Interface -> `OrderServiceImpl`)**: Encapsulates business logic. Transaction management (`@Transactional`) ensures atomicity (e.g., if saving an order item fails, the parent order rolls back).
-4. **Repositories (`OrderRepository`)**: Spring Data JPA interfaces extending `JpaRepository`. Provides out-of-the-box CRUD and pagination capability.
-5. **Entities (`Order`, `OrderItem`)**: Object-Relational Mapped (ORM) JPA classes.
+4. **DAO (`OrderDao` Interface -> `OrderDaoImpl`)**: Abstracts the underlying database technology from the business logic, bridging the Service and the Repository.
+5. **Repositories (`OrderRepository`)**: Spring Data JPA interfaces extending `JpaRepository`. Provides out-of-the-box CRUD and pagination capability.
+6. **Entities (`Order`, `OrderItem`)**: Object-Relational Mapped (ORM) JPA classes.
    * *Note on Entities:* We explicitly use `@Getter` and `@Setter` instead of Lombok's `@Data` to prevent fatal circular reference `StackOverflowError`s resulting from the bidirectional One-to-Many mapping.
-6. **Global Exception Handling (`GlobalExceptionHandler`)**: A centralized `@ControllerAdvice` component that intercepts standard exceptions (`ResourceNotFoundException`, `MethodArgumentNotValidException`) and maps them to a uniform JSON `ErrorResponse` structure.
-7. **Scheduled Job (`OrderStatusJob`)**: A Spring `@Scheduled` background task running asynchronously to update `PENDING` orders to `PROCESSING`.
+7. **Global Exception Handling (`GlobalExceptionHandler`)**: A centralized `@ControllerAdvice` component that intercepts standard exceptions (`ResourceNotFoundException`, `MethodArgumentNotValidException`) and maps them to a uniform JSON `ErrorResponse` structure.
+8. **Scheduled Job (`OrderStatusJob`)**: A Spring `@Scheduled` background task running asynchronously to update `PENDING` orders to `PROCESSING`.
+9. **Centralized Logging**: Asynchronous Logback implementation generating Rolling Files.
 
 ---
 
@@ -69,6 +75,12 @@ When designing software, premature optimization is a massive anti-pattern. The r
    * **Reasoning:** Redis is typically used for distributed caching, session management, or as a message broker. Our dataset (orders) is highly transactional and stateful. We do not have read-heavy workloads that require sub-millisecond cache hits. Writing directly to PostgreSQL ensures ACID compliance, which is critical for e-commerce orders.
 3. **Why not AWS / EKS / EC2?**
    * **Reasoning:** To meet the assignment's constraint of providing a zero-cost demonstration environment, we opted for **Serverless/PaaS** solutions (Neon.tech for Postgres, Render.com for App Hosting). Utilizing raw AWS EC2 or EKS would incur immediate billing and require complex Terraform/VPC setups, which falls outside the scope of demonstrating core backend coding competency.
+
+### Logging Strategy & Analysis
+
+This repository utilizes an industry-standard **Asynchronous Rolling File** logging configuration via `logback-spring.xml` utilizing SLF4J (`@Slf4j`).
+* **Format & Storage:** Logs are written in an async queue to avoid blocking threads and are rolled daily (retaining 30 days history up to 3GB total) in a local `logs/` directory.
+* **Centralized Log Analysis:** While the logs are currently generated locally, the architecture is explicitly designed to support the standard **Sidecar Pattern**. In a production Kubernetes/EC2 environment, you would run a log-shipping agent (such as **Fluentd**, **Filebeat**, or **Datadog Agent**) alongside the application. This sidecar agent tails the `logs/order-system.log` file periodically and pushes the data to a centralized observability stack like the **ELK Stack (Elasticsearch, Logstash, Kibana)** or **Splunk** for alerting, indexing, and anomaly detection.
 
 ---
 
@@ -141,7 +153,7 @@ To showcase this application without incurring costs, use the following free-tie
 *As requested by the coding assignment guidelines, here is a breakdown of how AI was leveraged:*
 
 ### 1. Architecture & Design Auditing
-- **Prompting:** AI was utilized to analyze the codebase against strict enterprise standards. It proactively recommended and implemented a `GlobalExceptionHandler` (`@ControllerAdvice`), extracted interfaces (`OrderService`), and introduced `Pageable` pagination to list endpoints to prevent memory exhaustion at scale.
+- **Prompting:** AI was utilized to analyze the codebase against strict enterprise standards. It proactively recommended and implemented a `GlobalExceptionHandler` (`@ControllerAdvice`), a **DAO Layer** (`OrderDao` -> `OrderRepository`), extracted interfaces (`OrderService`), introduced asynchronous `RollingFile` logging, and introduced `Pageable` pagination to list endpoints to prevent memory exhaustion at scale.
 
 ### 2. Boilerplate & Setup
 - **Prompting:** AI generated the Maven build scripts, directory structures, and `application.yml` configurations, dynamically swapping from properties to YAML for standard configurations.
