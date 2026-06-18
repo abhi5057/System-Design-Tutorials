@@ -46,7 +46,7 @@ The system strictly adheres to enterprise **SOLID** principles and the layered a
 5. **Repositories (`OrderRepository`)**: Spring Data JPA interfaces extending `JpaRepository`. Provides out-of-the-box CRUD and pagination capability.
 6. **Entities (`Order`, `OrderItem`)**: Object-Relational Mapped (ORM) JPA classes.
    * *Note on Entities:* We explicitly use `@Getter` and `@Setter` instead of Lombok's `@Data` to prevent fatal circular reference `StackOverflowError`s resulting from the bidirectional One-to-Many mapping.
-7. **Global Exception Handling (`GlobalExceptionHandler`)**: A centralized `@ControllerAdvice` component that intercepts standard exceptions (`ResourceNotFoundException`, `MethodArgumentNotValidException`) and maps them to a uniform JSON `ErrorResponse` structure.
+7. **Global Exception Handling (`GlobalExceptionHandler`)**: A centralized `@ControllerAdvice` component that intercepts standard exceptions (`ResourceNotFoundException`, `MethodArgumentNotValidException`). It natively utilizes **RFC 7807 (ProblemDetail)**, which is the Spring Boot 3 standard for standardizing HTTP error payloads.
 8. **Scheduled Job (`OrderStatusJob`)**: A Spring `@Scheduled` background task running asynchronously to update `PENDING` orders to `PROCESSING`.
 9. **Centralized Logging**: Asynchronous Logback implementation generating Rolling Files.
 

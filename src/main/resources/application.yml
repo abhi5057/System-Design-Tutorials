@@ -16,6 +16,11 @@ spring:
 server:
   port: ${PORT:8080}
 
+spring:
+  webmvc:
+    problemdetails:
+      enabled: true
+
 springdoc:
   api-docs:
     path: /api-docs
