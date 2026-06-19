@@ -127,8 +127,12 @@ To showcase this application without incurring costs, use the following free-tie
 ### 1. Database: Neon.tech (Serverless PostgreSQL)
 1. Go to [Neon.tech](https://neon.tech/) and sign up.
 2. Create a new project.
-3. Copy the connection string (`postgresql://...`).
-4. Convert it to JDBC format: `jdbc:postgresql://endpoint.neon.tech/dbname`.
+3. In the "Connection Details" widget, click the **"Parameters"** tab to view your credentials explicitly. Alternatively, extract them from the provided connection string:
+   * **String Format:** `postgresql://[USERNAME]:[PASSWORD]@[HOST]/[DATABASE]`
+   * **Username:** The text between `postgresql://` and `:`
+   * **Password:** The text between `:` and `@`
+4. Convert the host and database into the JDBC format required by Spring Boot:
+   `jdbc:postgresql://[HOST]/[DATABASE]?sslmode=require`
 
 ### 2. Application Hosting: Render.com (Web Service)
 1. Push this repository to your GitHub.
