@@ -48,3 +48,9 @@ express-crud-api/prisma.config.ts
 .claude/
 .windsurf/
 prisma.config.ts
+venv/
+__pycache__/
+chatbot-langchain-fastapi/venv/
+chatbot-langgraph-fastapi/venv/
+chatbot-langchain-fastapi/venv/
+chatbot-langgraph-fastapi/venv/
