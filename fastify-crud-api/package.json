@@ -1,0 +1,26 @@
+{
+  "name": "fastify-crud-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@sinclair/typebox": "^0.34.52",
+    "fastify": "^5.11.3"
+  },
+  "devDependencies": {
+    "@fastify/cors": "^11.3.0",
+    "@types/node": "^26.2.0",
+    "fastify-plugin": "^6.0.0",
+    "prisma": "^5.22.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  }
+}
