@@ -35,3 +35,22 @@ build/
 # Logs
 logs/
 *.log
+node_modules/
+dist/
+.env
+prisma/*.db
+prisma/*.db-journal
+express-crud-api/.agents/
+express-crud-api/.claude/
+express-crud-api/.windsurf/
+express-crud-api/prisma.config.ts
+.agents/
+.claude/
+.windsurf/
+prisma.config.ts
+venv/
+__pycache__/
+chatbot-langchain-fastapi/venv/
+chatbot-langgraph-fastapi/venv/
+chatbot-langchain-fastapi/venv/
+chatbot-langgraph-fastapi/venv/
