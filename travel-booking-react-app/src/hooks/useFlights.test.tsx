@@ -70,16 +70,26 @@ describe('useFlights Hook', () => {
   });
 
   it('should handle errors gracefully', async () => {
+    // Disable console.error to avoid polluting test output with React Query error logs
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     const errorMsg = 'Network Error';
+
+    // Explicitly override query defaults to ensure no retries even if hook sets retry: 1
+    queryClient.setQueryDefaults(['flights'], { retry: false });
+
+    // Mock the rejection
     vi.mocked(mockApi.fetchFlights).mockRejectedValueOnce(new Error(errorMsg));
 
     const { result } = renderHook(
-      () => useFlights('JFK', 'LHR', '2024-12-01', true),
+      () => useFlights('ERR3', 'LHR', '2024-12-01', true),
       { wrapper }
     );
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 
     expect(result.current.error?.message).toBe(errorMsg);
+
+    consoleSpy.mockRestore();
   });
 });

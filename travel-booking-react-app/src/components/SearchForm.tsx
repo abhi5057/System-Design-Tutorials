@@ -18,15 +18,31 @@ export const SearchForm: React.FC = () => {
   const [destination, setDestination] = useState('');
   const [date, setDate] = useState('');
   const [passengers] = useState(1);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // Get today's date in YYYY-MM-DD format for min date validation
+  const today = new Date().toISOString().split('T')[0];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
+
+    // Client-side validation: Edge Case Handling
+    if (origin.trim().toLowerCase() === destination.trim().toLowerCase()) {
+      setErrorMsg('Origin and destination cannot be the same.');
+      return;
+    }
+
+    if (date < today) {
+      setErrorMsg('Travel date cannot be in the past.');
+      return;
+    }
 
     // Dispatch the finalized search criteria to the global Redux store
     dispatch(
       setSearchCriteria({
-        origin,
-        destination,
+        origin: origin.trim(),
+        destination: destination.trim(),
         date,
         passengers,
       })
@@ -34,10 +50,24 @@ export const SearchForm: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto mt-8 border border-gray-200">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Find Your Flight</h2>
+    <section
+      className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto mt-8 border border-gray-200"
+      aria-labelledby="search-form-heading"
+    >
+      <h2 id="search-form-heading" className="text-2xl font-bold mb-6 text-gray-800">Find Your Flight</h2>
 
-      <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4">
+      {/* Accessible Error Summary */}
+      {errorMsg && (
+        <div
+          className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r"
+          role="alert"
+          aria-live="assertive"
+        >
+          {errorMsg}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4" noValidate>
         {/* Origin Field */}
         <div className="flex-1">
           <label htmlFor="origin" className="block text-sm font-medium text-gray-700 mb-1">From</label>
@@ -90,6 +120,6 @@ export const SearchForm: React.FC = () => {
           </button>
         </div>
       </form>
-    </div>
+    </section>
   );
 };
